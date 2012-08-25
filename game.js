@@ -1,0 +1,197 @@
+window.onload = function () {
+    Crafty.init(1024, 768);
+
+    // The loading screen that will display while our assets load
+    Crafty.scene("loading", function () {
+
+        // Load takes an array of assets and a callback when complete
+        Crafty.load(["assets/sprites.png"], function () {
+            Crafty.scene("main"); // When everything is loaded, run the main scene
+        });
+
+        // Black background with some loading text
+        Crafty.background("#1e1e1e");
+        Crafty.e("2D, Canvas, Text")
+            .attr({ w: 100, h: 20, x: 462, y: 374 })
+            .text("Loading...");
+    });
+
+    Crafty.scene("main", function () {
+
+        Crafty.background("#1e1e1e");
+        generateWorld();
+
+        // Create our player entity with some premade components
+        var player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
+                .attr({ x: 32, y: 32, z: 1 })
+                .rightControls(1)
+                .Tank("blue");
+        var player2 = Crafty.e("2D, Canvas, GreenTank, Tank, Controls, solid")
+                .attr({ x: 64, y: 32, z: 1 })
+                .leftControls(1)
+                .Tank("green");
+        
+        // Global viewport scrolling
+        Crafty.bind("EnterFrame", function() {
+            if (!player1) return;
+            // Position of the viewport
+            var vpx = (player1._x - (1024/2)),
+                vpy = (player1._y - (768/2));
+            // Max x in map * 32 - Crafty.viewport.width = 1164
+            if (vpx > 0 && vpx < 1025) {
+                Crafty.viewport.x = -vpx;
+            }
+            if(vpy > 0 && vpy < 769) {
+                Crafty.viewport.y = -vpy;
+            }
+        }); 
+    });    
+
+    // Turn the sprite map into usable components
+    Crafty.sprite(32, "assets/sprites.png", {
+        BlueTank: [4, 2],
+        GreenTank: [4, 1],
+        empty: [0, 0]
+    });
+
+    // Function to generate the map
+    function generateWorld() {
+        //loop through all tiles
+        /*
+        for (var i = 0; i < 64; i++) {
+            for (var j = 0; j < 48; j++) {
+
+            }
+        }
+        */
+    }                   
+
+    Crafty.c("Controls", {
+        init: function() {
+            this.requires('Multiway');
+        },
+        
+        leftControls: function(speed) {
+            this.multiway(speed, {W: -90, S: 90, D: 0, A: 180})
+            return this;
+        },
+        rightControls: function(speed) {
+            this.multiway(speed, {UP_ARROW: -90, DOWN_ARROW: 90, RIGHT_ARROW: 0, LEFT_ARROW: 180})
+            return this;
+        }
+    });
+
+    Crafty.c('Tank', {
+        init: function() {
+            this.requires("SpriteAnimation, Collision, Grid, WiredHitBox");
+        },
+        Tank: function(color) {
+                
+            var sprite_row = (color === "blue"? 2 : 1);  
+
+            // Setup sprite
+            this.animate("walk_down", 0, sprite_row, 0)
+                .animate("walk_right_down", 1, sprite_row, 1)
+                .animate("walk_right", 2, sprite_row, 2)
+                .animate("walk_right_up", 3, sprite_row, 3)
+                .animate("walk_up", 4, sprite_row, 4)
+                .animate("walk_left_up", 5, sprite_row, 5)
+                .animate("walk_left", 6, sprite_row, 6)
+                .animate("walk_left_down", 7, sprite_row, 7)
+                .bind("NewDirection", function (direction) {
+                    if (direction.y > 0 && !direction.x) {
+                        if (!this.isPlaying("walk_down")) {
+                            this.stop().animate("walk_down", 0, 0);
+                            this.collision(new Crafty.polygon([6,4],[26,4],
+                                [26,28],[18,32],[14,32],[6,28])); 
+                        }
+                    }
+                    else if (direction.y > 0 && direction.x > 0) {
+                        if (!this.isPlaying("walk_right_down")) {
+                            this.stop().animate("walk_right_down", 0, 0);
+                            this.collision(new Crafty.polygon([14,2],[18,2],
+                                [30,14],[30,18],[26,26],[18,30],[14,30],
+                                [2,18],[2,14])); 
+                        }
+                    }
+                    else if (direction.x > 0 && !direction.y) {
+                        if (!this.isPlaying("walk_right")) {
+                            this.stop().animate("walk_right", 0, 0);
+                            this.collision(new Crafty.polygon([4,6],[28,6],
+                                [32,14],[32,18],[28,26],[4,26],[4,10]));
+                        }
+                    }
+                    else if (direction.y < 0 && direction.x > 0) {
+                        if (!this.isPlaying("walk_right_up")) {
+                            this.stop().animate("walk_right_up", 0, 0);
+                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
+                        }
+                    }
+                    else if (direction.y < 0 && !direction.x) {
+                        if (!this.isPlaying("walk_up")) {
+                            this.stop().animate("walk_up", 0, 0);
+                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
+                        }
+                    }
+                    else if (direction.y < 0 && direction.x < 0) {
+                        if (!this.isPlaying("walk_left_up")) {
+                            this.stop().animate("walk_left_up", 0, 0);
+                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
+                        }
+                    }
+                    else if (direction.x < 0 && !direction.y) {
+                        if (!this.isPlaying("walk_left")) {
+                            this.stop().animate("walk_left", 0, 0);
+                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
+                        }
+                    }
+                    else if (direction.y > 0 && direction.x < 0) {
+                        if (!this.isPlaying("walk_left_down")) {
+                            this.stop().animate("walk_left_down", 0, 0);
+                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
+                        }
+                    }
+                    else if(!direction.x && !direction.y) {
+                        this.stop();
+                    }
+            })
+            .onHit("solid", function () {
+                // TODO: Move unit out of solid tile
+            })
+            .bind('Moved', function(from) {
+                if(this.hit("solid")){
+                    this.attr({x: from.x, y: from.y});
+                }
+            })
+            .onHit("fire", function() {
+                //this.destroy();
+                // TODO: Subtract life and play hit sound
+            });
+            return this;
+        }
+    });
+
+/*
+    Crafty.scene("main-menu", function () {
+        Crafty.background("#000");
+        Crafty.e("2D, Canvas, Text").attr({ w: 200, h: 20, x: 412, y: 100 })
+            .text("TUNNELER HTML5")
+            .css({ "text-align": "center",
+                   "color": "#fc5454" });
+        Crafty.e("2D, Canvas, Text").attr({ w: 200, h: 20, x: 412, y: 140 })
+            .text("by Cristian Peraferrer")
+            .css({ "text-align": "center",
+                   "color": "#a80000" });
+         
+    });
+
+    Crafty.scene("game", function () {
+        Crafty.background("#000031");
+         
+    });
+*/
+
+    //automatically play the loading scene
+    Crafty.scene("loading");
+};
+
