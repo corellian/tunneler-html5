@@ -30,6 +30,12 @@ window.onload = function () {
                 .attr({ x: 64, y: 32, z: 1 })
                 .leftControls(1)
                 .Tank("green");
+        var blueBase = Crafty.e("2D, TankBase")
+                .attr({x:200, y:200})
+                .tankbase("#0000a4");
+        var greenBase = Crafty.e("2D, TankBase")
+                .attr({x:500, y:200})
+                .tankbase("#159c05");
         
         // Global viewport scrolling
         Crafty.bind("EnterFrame", function() {
@@ -168,6 +174,49 @@ window.onload = function () {
                 // TODO: Subtract life and play hit sound
             });
             return this;
+        }
+    });
+
+    Crafty.c("TankBase", {
+        init: function() {
+
+            this.requires("2D");
+            
+            this.leftwall = Crafty.e("Canvas, 2D, Color, solid");
+            this.lefttopwall = Crafty.e("Canvas, 2D, Color, solid");
+            this.leftbottomwall = Crafty.e("Canvas, 2D, Color, solid");
+            this.rightwall = Crafty.e("Canvas, 2D, Color, solid");
+            this.righttopwall = Crafty.e("Canvas, 2D, Color, solid");
+            this.rightbottomwall = Crafty.e("Canvas, 2D, Color, solid");
+        },
+        tankbase: function(color) {
+            var wall_width = 4, wall_length = 128, door_length = 32;
+
+            this.leftwall.attr({
+                    x: this.x, y: this.y, w: wall_width, h: wall_length
+                }).color(color);
+            this.lefttopwall.attr({
+                    x: this.x, y: this.y, w: (wall_length/2) - (door_length/2), h: wall_width
+                }).color(color);
+            this.leftbottomwall.attr({
+                    x: this.x, y: this.y + wall_length, w: (wall_length/2) - (door_length/2), h: wall_width
+                }).color(color);
+
+            this.rightwall.attr({
+                    x: this.x + wall_length - wall_width, y: this.y, w: wall_width, h: wall_length
+                }).color(color);
+            this.righttopwall.attr({
+                    x: this.x + (wall_length / 2) + (door_length / 2), y: this.y, w: (wall_length/2) - (door_length/2), h: wall_width
+                }).color(color);
+            this.rightbottomwall.attr({
+                    x: this.x + (wall_length / 2) + (door_length / 2), y: this.y + wall_length, w: (wall_length/2) - (door_length/2), h: wall_width
+                }).color(color);
+            this.attach(this.leftwall);
+            this.attach(this.lefttopwall);
+            this.attach(this.leftbottomwall);
+            this.attach(this.rightwall);
+            this.attach(this.righttopwall);
+            this.attach(this.rightbottomwall);
         }
     });
 
