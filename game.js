@@ -121,60 +121,64 @@ window.onload = function () {
                 .animate("walk_left", 6, sprite_row, 6)
                 .animate("walk_left_down", 7, sprite_row, 7)
                 .bind("NewDirection", function (direction) {
+                    var new_dir, new_hitbox, stopped = false;
+
                     if (direction.y > 0 && !direction.x) {
-                        if (!this.isPlaying("walk_down")) {
-                            this.stop().animate("walk_down", 0, 0);
-                            this.collision(new Crafty.polygon([6,4],[26,4],
-                                [26,28],[18,32],[14,32],[6,28])); 
-                        }
+                        new_dir = "walk_down";
+                        new_hitbox = new Crafty.polygon(
+                            [6,4],[26,4],[26,28],[18,32],[14,32],[6,28]
+                        );
                     }
                     else if (direction.y > 0 && direction.x > 0) {
-                        if (!this.isPlaying("walk_right_down")) {
-                            this.stop().animate("walk_right_down", 0, 0);
-                            this.collision(new Crafty.polygon([14,2],[18,2],
-                                [30,14],[30,18],[26,26],[18,30],[14,30],
-                                [2,18],[2,14])); 
-                        }
+                        new_dir = "walk_right_down";
+                        new_hitbox = new Crafty.polygon(
+                            [14,2],[18,2],[30,14],[30,18],[26,26],[18,30],
+                            [14,30],[2,18],[2,14]
+                        );
                     }
                     else if (direction.x > 0 && !direction.y) {
-                        if (!this.isPlaying("walk_right")) {
-                            this.stop().animate("walk_right", 0, 0);
-                            this.collision(new Crafty.polygon([4,6],[28,6],
-                                [32,14],[32,18],[28,26],[4,26],[4,10]));
-                        }
+                        new_dir = "walk_right";
+                        new_hitbox = new Crafty.polygon(
+                            [4,6],[28,6],[32,14],[32,18],[28,26],[4,26],[4,10]
+                        );
                     }
                     else if (direction.y < 0 && direction.x > 0) {
-                        if (!this.isPlaying("walk_right_up")) {
-                            this.stop().animate("walk_right_up", 0, 0);
-                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
-                        }
+                        new_dir = "walk_right_up";
+                        new_hitbox = new Crafty.polygon(
+                            [0,0],[0,10],[10,10],[10,0]
+                        );
                     }
                     else if (direction.y < 0 && !direction.x) {
-                        if (!this.isPlaying("walk_up")) {
-                            this.stop().animate("walk_up", 0, 0);
-                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
-                        }
+                        new_dir = "walk_up";
+                        new_hitbox = new Crafty.polygon(
+                            [0,0],[0,10],[10,10],[10,0]
+                        );
                     }
                     else if (direction.y < 0 && direction.x < 0) {
-                        if (!this.isPlaying("walk_left_up")) {
-                            this.stop().animate("walk_left_up", 0, 0);
-                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
-                        }
+                        new_dir = "walk_left_up";
+                        new_hitbox = new Crafty.polygon(
+                            [0,0],[0,10],[10,10],[10,0]
+                        );
                     }
                     else if (direction.x < 0 && !direction.y) {
-                        if (!this.isPlaying("walk_left")) {
-                            this.stop().animate("walk_left", 0, 0);
-                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
-                        }
+                        new_dir = "walk_left";
+                        new_hitbox = new Crafty.polygon(
+                            [0,0],[0,10],[10,10],[10,0]
+                        );
                     }
                     else if (direction.y > 0 && direction.x < 0) {
-                        if (!this.isPlaying("walk_left_down")) {
-                            this.stop().animate("walk_left_down", 0, 0);
-                            this.collision(new Crafty.polygon([0,0],[0,10],[10,10],[10,0])); 
-                        }
+                        new_dir = "walk_left_down";
+                        new_hitbox = new Crafty.polygon(
+                            [0,0],[0,10],[10,10],[10,0]
+                        );
                     }
                     else if(!direction.x && !direction.y) {
                         this.stop();
+                        stopped = true;
+                    }
+                    if (!stopped && !this.isPlaying(new_dir)) {
+                        this.stop().animate(new_dir, 0, 0);
+                        this.collision(new_hitbox); 
                     }
             })
             .onHit("solid", function () {
