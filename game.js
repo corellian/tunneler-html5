@@ -1,5 +1,16 @@
 window.onload = function () {
-    Crafty.init(1024, 768);
+    var MAP_WIDTH = 1024,
+        MAP_HEIGHT = 768;
+
+    Crafty.init(MAP_WIDTH, MAP_HEIGHT);
+
+    var EMPTY_COLOR = "#000000",
+        // 0: blue, 1: green
+        BASE_COLOR = ["#1f00fe", "#22ff05"],
+        DIRT_COLOR = ["#b56525", "#a94608"];
+        // 0: blue, 1: green
+        // TANK_COLOR = [["#f0eb18", "#1f00fe", "#0000a7"],
+        //               ["#f0eb18", "#22ff05", "#159e04"]];
 
     // The loading screen that will display while our assets load
     Crafty.scene("loading", function () {
@@ -10,7 +21,7 @@ window.onload = function () {
         });
 
         // Black background with some loading text
-        Crafty.background("#1e1e1e");
+        Crafty.background(EMPTY_COLOR);
         Crafty.e("2D, Canvas, Text")
             .attr({ w: 100, h: 20, x: 462, y: 374 })
             .text("Loading...");
@@ -18,10 +29,9 @@ window.onload = function () {
 
     Crafty.scene("main", function () {
 
-        Crafty.background("#1e1e1e");
+        Crafty.background(EMPTY_COLOR);
         generateMap();
 
-        // Create our player entity with some premade components
         var player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
                 .attr({ x: 32, y: 32, z: 1 })
                 .rightControls(1)
@@ -32,10 +42,10 @@ window.onload = function () {
                 .Tank("green");
         var blueBase = Crafty.e("2D, TankBase")
                 .attr({x:200, y:200})
-                .tankbase("#0000a4");
+                .tankbase(BASE_COLOR[0]);
         var greenBase = Crafty.e("2D, TankBase")
                 .attr({x:500, y:200})
-                .tankbase("#159c05");
+                .tankbase(BASE_COLOR[1]);
         
         // Global viewport scrolling
         Crafty.bind("EnterFrame", function() {
