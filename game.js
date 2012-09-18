@@ -83,7 +83,7 @@ window.onload = function () {
         for (var i = 0; i < 256; i++) {
             for (var j = 0; j < 192; j++) {
                 // We first fill with dirt
-                world[i][j] = Crafty.math.randomElementOfArray([0,1]));
+                world[i][j] = Crafty.math.randomElementOfArray([0,1]);
             }
         }
     }                   
