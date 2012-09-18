@@ -19,7 +19,7 @@ window.onload = function () {
     Crafty.scene("main", function () {
 
         Crafty.background("#1e1e1e");
-        generateWorld();
+        generateMap();
 
         // Create our player entity with some premade components
         var player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
@@ -61,15 +61,21 @@ window.onload = function () {
     });
 
     // Function to generate the map
-    function generateWorld() {
-        //loop through all tiles
-        /*
-        for (var i = 0; i < 64; i++) {
-            for (var j = 0; j < 48; j++) {
+    function generateMap() {
 
+        var world = new Array(256);
+
+        for (var i = 0; i < 256; i++) {
+            world[i] = new Array(192);
+        }
+
+        // Initialize the world
+        for (var i = 0; i < 256; i++) {
+            for (var j = 0; j < 192; j++) {
+                // We first fill with dirt
+                world[i][j] = Crafty.math.randomElementOfArray([0,1]));
             }
         }
-        */
     }                   
 
     Crafty.c("Controls", {
