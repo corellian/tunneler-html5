@@ -121,61 +121,58 @@ window.onload = function () {
                 .animate("walk_left", 6, sprite_row, 6)
                 .animate("walk_left_down", 7, sprite_row, 7)
                 .bind("NewDirection", function (direction) {
-                    var new_dir, new_hitbox, stopped = false;
+                    var new_dir = "walk", new_hitbox, stopped = false;
 
-                    if (direction.y > 0 && !direction.x) {
-                        new_dir = "walk_down";
-                        new_hitbox = new Crafty.polygon(
-                            [6,4],[26,4],[26,28],[18,32],[14,32],[6,28]
-                        );
+                    if (direction.x)
+                    {
+                        if (direction.x > 0)
+                            new_dir += "_right"; 
+                        else
+                            new_dir += "_left";
                     }
-                    else if (direction.y > 0 && direction.x > 0) {
-                        new_dir = "walk_right_down";
-                        new_hitbox = new Crafty.polygon(
-                            [14,2],[18,2],[30,14],[30,18],[26,26],[18,30],
-                            [14,30],[2,18],[2,14]
-                        );
+
+                    if (direction.y)
+                    {
+                        if (direction.y > 0)
+                            new_dir += "_down";
+                        else
+                            new_dir += "_up";
                     }
-                    else if (direction.x > 0 && !direction.y) {
-                        new_dir = "walk_right";
-                        new_hitbox = new Crafty.polygon(
-                            [4,6],[28,6],[32,14],[32,18],[28,26],[4,26],[4,10]
-                        );
+
+                    switch(new_dir)
+                    {
+                        case "walk_right":
+                            new_hitbox = new Crafty.polygon(
+                                [4,6],[28,6],[32,14],[32,18],[28,26],[4,26],
+                                [4,10]
+                            );
+                            break;
+                        case "walk_right_down":
+                            new_hitbox = new Crafty.polygon(
+                                [14,2],[18,2],[30,14],[30,18],[26,26],[18,30],
+                                [14,30],[2,18],[2,14]
+                            );
+                            break;
+                        case "walk_down":
+                            new_hitbox = new Crafty.polygon(
+                                [6,4],[26,4],[26,28],[18,32],[14,32],[6,28]
+                            );
+                            break;
+                        case "walk_right_up":
+                        case "walk_up":
+                        case "walk_left":
+                        case "walk_left_up":
+                        case "walk_left_down":
+                            new_hitbox = new Crafty.polygon(
+                                [0,0],[0,10],[10,10],[10,0]
+                            );
+                            break;
+                        default:
+                            this.stop();
+                            stopped = true;
+                            break;
                     }
-                    else if (direction.y < 0 && direction.x > 0) {
-                        new_dir = "walk_right_up";
-                        new_hitbox = new Crafty.polygon(
-                            [0,0],[0,10],[10,10],[10,0]
-                        );
-                    }
-                    else if (direction.y < 0 && !direction.x) {
-                        new_dir = "walk_up";
-                        new_hitbox = new Crafty.polygon(
-                            [0,0],[0,10],[10,10],[10,0]
-                        );
-                    }
-                    else if (direction.y < 0 && direction.x < 0) {
-                        new_dir = "walk_left_up";
-                        new_hitbox = new Crafty.polygon(
-                            [0,0],[0,10],[10,10],[10,0]
-                        );
-                    }
-                    else if (direction.x < 0 && !direction.y) {
-                        new_dir = "walk_left";
-                        new_hitbox = new Crafty.polygon(
-                            [0,0],[0,10],[10,10],[10,0]
-                        );
-                    }
-                    else if (direction.y > 0 && direction.x < 0) {
-                        new_dir = "walk_left_down";
-                        new_hitbox = new Crafty.polygon(
-                            [0,0],[0,10],[10,10],[10,0]
-                        );
-                    }
-                    else if(!direction.x && !direction.y) {
-                        this.stop();
-                        stopped = true;
-                    }
+                    
                     if (!stopped && !this.isPlaying(new_dir)) {
                         this.stop().animate(new_dir, 0, 0);
                         this.collision(new_hitbox); 
