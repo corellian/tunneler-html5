@@ -1,6 +1,8 @@
 window.onload = function () {
     var MAP_WIDTH = 1024,
-        MAP_HEIGHT = 768;
+        MAP_HEIGHT = 768,
+        TANK_WIDTH = 32,
+        TANK_HEIGHT = 32;
 
     Crafty.init(MAP_WIDTH, MAP_HEIGHT);
 
@@ -11,6 +13,8 @@ window.onload = function () {
         // 0: blue, 1: green
         // TANK_COLOR = [["#f0eb18", "#1f00fe", "#0000a7"],
         //               ["#f0eb18", "#22ff05", "#159e04"]];
+
+    var player1, player2;
 
     // The loading screen that will display while our assets load
     Crafty.scene("loading", function () {
@@ -32,17 +36,20 @@ window.onload = function () {
         Crafty.background(EMPTY_COLOR);
         generateMap();
 
-        var player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
-                .attr({ x: 32, y: 32, z: 1 })
+        player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
+                .attr({ x: 350, y: 350, z: 1 })
                 .rightControls(1)
                 .Tank("blue");
-        var player2 = Crafty.e("2D, Canvas, GreenTank, Tank, Controls, solid")
-                .attr({ x: 64, y: 32, z: 1 })
+
+        player2 = Crafty.e("2D, Canvas, GreenTank, Tank, Controls, solid")
+                .attr({ x: 650, y: 350, z: 1 })
                 .leftControls(1)
                 .Tank("green");
+
         var blueBase = Crafty.e("2D, TankBase")
                 .attr({x:200, y:200})
                 .tankbase(BASE_COLOR[0]);
+
         var greenBase = Crafty.e("2D, TankBase")
                 .attr({x:500, y:200})
                 .tankbase(BASE_COLOR[1]);
@@ -105,24 +112,14 @@ window.onload = function () {
 
     Crafty.c('Tank', {
         init: function() {
-            this.requires("SpriteAnimation, Collision, Grid, WiredHitBox");
-        },
-        Tank: function(color) {
-                
-            var sprite_row = (color === "blue"? 2 : 1);  
+            this.requires("SpriteAnimation, Collision, SolidHitBox");
+            
+            this.collision(new Crafty.polygon([[0,0],[0,5],[5,5],[5,0]])); 
 
-            // Setup sprite
-            this.animate("walk_down", 0, sprite_row, 0)
-                .animate("walk_right_down", 1, sprite_row, 1)
-                .animate("walk_right", 2, sprite_row, 2)
-                .animate("walk_right_up", 3, sprite_row, 3)
-                .animate("walk_up", 4, sprite_row, 4)
-                .animate("walk_left_up", 5, sprite_row, 5)
-                .animate("walk_left", 6, sprite_row, 6)
-                .animate("walk_left_down", 7, sprite_row, 7)
-                .bind("NewDirection", function (direction) {
+            this.bind("NewDirection", function (direction) {
                     var new_dir = "walk", new_hitbox, stopped = false;
 
+                    // Determine direction string
                     if (direction.x)
                     {
                         if (direction.x > 0)
@@ -142,30 +139,26 @@ window.onload = function () {
                     switch(new_dir)
                     {
                         case "walk_right":
-                            new_hitbox = new Crafty.polygon(
-                                [4,6],[28,6],[32,14],[32,18],[28,26],[4,26],
-                                [4,10]
-                            );
+                            new_hitbox = [[4,6],[28,6],[32,14],[32,18],[28,26],
+                                [4,26],[4,10]];
                             break;
                         case "walk_right_down":
-                            new_hitbox = new Crafty.polygon(
-                                [14,2],[18,2],[30,14],[30,18],[26,26],[18,30],
-                                [14,30],[2,18],[2,14]
-                            );
+                            new_hitbox = [[14,2],[18,2],[30,14],[30,18],[26,26],
+                                [18,30],[14,30],[2,18],[2,14]];
                             break;
                         case "walk_down":
-                            new_hitbox = new Crafty.polygon(
-                                [6,4],[26,4],[26,28],[18,32],[14,32],[6,28]
-                            );
+                            new_hitbox = [[6,4],[26,4],[26,28],[18,32],[14,32],
+                                [6,28]];
                             break;
                         case "walk_right_up":
+                            new_hitbox = [[14,2],[18,2],[26,6],[30,14],[30,18],
+                                [18,30],[14,30],[2,18],[2,14]];
+                            break;
                         case "walk_up":
                         case "walk_left":
                         case "walk_left_up":
                         case "walk_left_down":
-                            new_hitbox = new Crafty.polygon(
-                                [0,0],[0,10],[10,10],[10,0]
-                            );
+                            new_hitbox = [[0,0],[0,5],[5,5],[5,0]];
                             break;
                         default:
                             this.stop();
@@ -173,14 +166,17 @@ window.onload = function () {
                             break;
                     }
                     
-                    if (!stopped && !this.isPlaying(new_dir)) {
+                    if (!stopped && !this.isPlaying(new_dir))
+                    {
+                        this.collision(new Crafty.polygon(new_hitbox)); 
                         this.stop().animate(new_dir, 0, 0);
-                        this.collision(new_hitbox); 
                     }
             })
+            /*
             .onHit("solid", function () {
                 // TODO: Move unit out of solid tile
             })
+            */
             .bind('Moved', function(from) {
                 if(this.hit("solid")){
                     this.attr({x: from.x, y: from.y});
@@ -190,6 +186,20 @@ window.onload = function () {
                 //this.destroy();
                 // TODO: Subtract life and play hit sound
             });
+        },
+        Tank: function(color) {
+                
+            var sprite_row = (color === "blue"? 2 : 1);  
+
+            this.animate("walk_down", 0, sprite_row, 0)
+                .animate("walk_right_down", 1, sprite_row, 1)
+                .animate("walk_right", 2, sprite_row, 2)
+                .animate("walk_right_up", 3, sprite_row, 3)
+                .animate("walk_up", 4, sprite_row, 4)
+                .animate("walk_left_up", 5, sprite_row, 5)
+                .animate("walk_left", 6, sprite_row, 6)
+                .animate("walk_left_down", 7, sprite_row, 7);
+
             return this;
         }
     });
