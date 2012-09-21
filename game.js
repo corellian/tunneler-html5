@@ -1,6 +1,6 @@
 window.onload = function () {
-    var MAP_WIDTH = 1024,
-        MAP_HEIGHT = 768,
+    var MAP_WIDTH = window.innerWidth - 8,
+        MAP_HEIGHT = window.innerHeight - 8,
         TANK_WIDTH = 32,
         TANK_HEIGHT = 32;
 
