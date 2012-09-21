@@ -47,11 +47,11 @@ window.onload = function () {
                 .Tank("green");
 
         var blueBase = Crafty.e("2D, TankBase")
-                .attr({x:200, y:200})
+                .attr({x:300, y:300})
                 .tankbase(BASE_COLOR[0]);
 
         var greenBase = Crafty.e("2D, TankBase")
-                .attr({x:500, y:200})
+                .attr({x:600, y:300})
                 .tankbase(BASE_COLOR[1]);
         
         // Global viewport scrolling
