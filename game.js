@@ -16,6 +16,14 @@ window.onload = function () {
 
     var player1, player2;
 
+    // Viewport limits
+    var rx_limit = Crafty.viewport.width/2 
+                + Crafty.viewport.width/4 - TANK_WIDTH/2, 
+        lx_limit = Crafty.viewport.width/4 - TANK_WIDTH/2,
+        ry_limit = Crafty.viewport.height/2 
+                + Crafty.viewport.height/4 - TANK_HEIGHT/2, 
+        ly_limit = Crafty.viewport.height/4 - TANK_HEIGHT/2; 
+
     // The loading screen that will display while our assets load
     Crafty.scene("loading", function () {
 
@@ -53,21 +61,6 @@ window.onload = function () {
         var greenBase = Crafty.e("2D, TankBase")
                 .attr({x:600, y:300})
                 .tankbase(BASE_COLOR[1]);
-        
-        // Global viewport scrolling
-        Crafty.bind("EnterFrame", function() {
-            if (!player1) return;
-            // Position of the viewport
-            var vpx = (player1._x - (1024/2)),
-                vpy = (player1._y - (768/2));
-            // Max x in map * 32 - Crafty.viewport.width = 1164
-            if (vpx > 0 && vpx < 1025) {
-                Crafty.viewport.x = -vpx;
-            }
-            if(vpy > 0 && vpy < 769) {
-                Crafty.viewport.y = -vpy;
-            }
-        }); 
     });    
 
     // Turn the sprite map into usable components
@@ -180,6 +173,30 @@ window.onload = function () {
             .bind('Moved', function(from) {
                 if(this.hit("solid")){
                     this.attr({x: from.x, y: from.y});
+                }
+
+                var xdir = this._x - from.x, 
+                    ydir = this._y - from.y;  
+
+                if (xdir > 0 && player1._x > rx_limit)
+                {
+                    Crafty.viewport.x--; 
+                    rx_limit++; lx_limit++;
+                }
+                else if (xdir < 0 && player1._x < lx_limit)
+                {
+                    Crafty.viewport.x++;
+                    rx_limit--; lx_limit--;
+                }
+                if (ydir > 0 && player1._y > ry_limit)
+                {
+                    Crafty.viewport.y--; 
+                    ry_limit++; ly_limit++;
+                }
+                else if (ydir < 0 && player1._y < ly_limit)
+                {
+                    Crafty.viewport.y++;
+                    ry_limit--; ly_limit--;
                 }
             })
             .onHit("fire", function() {
