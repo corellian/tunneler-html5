@@ -2,7 +2,8 @@ window.onload = function () {
     var MAP_WIDTH = window.innerWidth - 8,
         MAP_HEIGHT = window.innerHeight - 8,
         TANK_WIDTH = 32,
-        TANK_HEIGHT = 32;
+        TANK_HEIGHT = 32,
+        PIXEL_SIZE = 4;
 
     Crafty.init(MAP_WIDTH, MAP_HEIGHT);
 
@@ -41,24 +42,27 @@ window.onload = function () {
 
     Crafty.scene("main", function () {
 
-        Crafty.background(EMPTY_COLOR);
-        generateMap();
+        //Crafty.background(EMPTY_COLOR);
+        //generateMap();
+        var level = Crafty.e("Level")
+                .attr({x: 0, y: 0})
+                .level();
 
         player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
-                .attr({ x: 350, y: 350, z: 1 })
-                .rightControls(1)
-                .Tank("blue");
+            .attr({ x: 350, y: 350, z: 1 })
+            .rightControls(1)
+            .Tank("blue");
 
         player2 = Crafty.e("2D, Canvas, GreenTank, Tank, Controls, solid")
-                .attr({ x: 650, y: 350, z: 1 })
-                .leftControls(1)
-                .Tank("green");
+            .attr({ x: 650, y: 350, z: 1 })
+            .leftControls(1)
+            .Tank("green");
 
         var blueBase = Crafty.e("2D, TankBase")
                 .attr({x:300, y:300})
-                .tankbase(BASE_COLOR[0]);
+                .tankbase(BASE_COLOR[0]),
 
-        var greenBase = Crafty.e("2D, TankBase")
+            greenBase = Crafty.e("2D, TankBase")
                 .attr({x:600, y:300})
                 .tankbase(BASE_COLOR[1]);
     });    
@@ -73,6 +77,7 @@ window.onload = function () {
     // Function to generate the map
     function generateMap() {
 
+        /*
         var world = new Array(256);
 
         for (var i = 0; i < 256; i++) {
@@ -86,6 +91,7 @@ window.onload = function () {
                 world[i][j] = Crafty.math.randomElementOfArray([0,1]);
             }
         }
+        */
     }                   
 
     Crafty.c("Controls", {
@@ -261,6 +267,37 @@ window.onload = function () {
             this.attach(this.rightwall);
             this.attach(this.righttopwall);
             this.attach(this.rightbottomwall);
+        }
+    });
+
+    Crafty.c("Level", {
+        init: function () {
+            this.requires("Canvas, 2D");
+
+            var draw = function (e) {
+                if (e.type === "canvas") {
+                    var context = e.ctx;
+                    
+                    context.save();
+                    context.translate(e.pos._x, e.pos._y);
+                    for (var i = 0; i < MAP_WIDTH; i += PIXEL_SIZE)
+                        for (var j = 0; j < MAP_HEIGHT; j += PIXEL_SIZE) {
+                            context.fillStyle = Crafty.math.randomElementOfArray(DIRT_COLOR);
+                            context.fillRect(i, j, PIXEL_SIZE, PIXEL_SIZE);
+                        }
+                    context.restore();
+                }
+            };
+
+            this.bind("Draw", draw).bind("RemoveComponent", function (id) {
+                if (id === "Level") this.unbind("Draw", draw);
+            });
+        },
+
+        level: function () {
+		    this.trigger("Change");
+
+            return this;
         }
     });
 
