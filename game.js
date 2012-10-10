@@ -1,16 +1,18 @@
 window.onload = function () {
-    var MAP_WIDTH = window.innerWidth - 8,
-        MAP_HEIGHT = window.innerHeight - 8,
+    var MAP_WIDTH = 640,
+        MAP_HEIGHT = 480,
         TANK_WIDTH = 32,
         TANK_HEIGHT = 32,
-        PIXEL_SIZE = 4;
+        PIXEL_SIZE = 4,
+        map;
 
     Crafty.init(MAP_WIDTH, MAP_HEIGHT);
 
     var EMPTY_COLOR = "#000000",
         // 0: blue, 1: green
         BASE_COLOR = ["#1f00fe", "#22ff05"],
-        DIRT_COLOR = ["#b56525", "#a94608"];
+        DIRT_COLOR = ["#b56525", "#a94608"],
+        DIRT_COLOR_RGBA = [[181,101,37,255],[169,70,8,255]];
         // 0: blue, 1: green
         // TANK_COLOR = [["#f0eb18", "#1f00fe", "#0000a7"],
         //               ["#f0eb18", "#22ff05", "#159e04"]];
@@ -42,11 +44,9 @@ window.onload = function () {
 
     Crafty.scene("main", function () {
 
-        //Crafty.background(EMPTY_COLOR);
-        //generateMap();
+        generateMap();
         var level = Crafty.e("Level")
-                .attr({x: 0, y: 0})
-                .level();
+            .attr({x: 100, y: 100, w: 256, h: 256});
 
         player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
             .attr({ x: 350, y: 350, z: 1 })
@@ -77,21 +77,17 @@ window.onload = function () {
     // Function to generate the map
     function generateMap() {
 
-        /*
-        var world = new Array(256);
+        var map_w = Math.floor(MAP_WIDTH / PIXEL_SIZE),
+            map_h = Math.floor(MAP_HEIGHT / PIXEL_SIZE);
 
-        for (var i = 0; i < 256; i++) {
-            world[i] = new Array(192);
-        }
+        map = {
+            data: new Array(map_w * map_h),
+            width: map_w,
+            height: map_h
+            };
 
-        // Initialize the world
-        for (var i = 0; i < 256; i++) {
-            for (var j = 0; j < 192; j++) {
-                // We first fill with dirt
-                world[i][j] = Crafty.math.randomElementOfArray([0,1]);
-            }
-        }
-        */
+        for (var i = 0; i < map_w * map_h; i++)
+            map.data[i] = Crafty.math.randomElementOfArray([0,1]);
     }                   
 
     Crafty.c("Controls", {
@@ -271,33 +267,34 @@ window.onload = function () {
     });
 
     Crafty.c("Level", {
+        ready: true,
+
         init: function () {
             this.requires("Canvas, 2D");
 
             var draw = function (e) {
                 if (e.type === "canvas") {
-                    var context = e.ctx;
-                    
-                    context.save();
-                    context.translate(e.pos._x, e.pos._y);
-                    for (var i = 0; i < MAP_WIDTH; i += PIXEL_SIZE)
-                        for (var j = 0; j < MAP_HEIGHT; j += PIXEL_SIZE) {
-                            context.fillStyle = Crafty.math.randomElementOfArray(DIRT_COLOR);
-                            context.fillRect(i, j, PIXEL_SIZE, PIXEL_SIZE);
-                        }
-                    context.restore();
+                    var context = e.ctx,
+                        color;
+                
+                    var imgData = context.getImageData(e.pos._x, e.pos._y, e.pos._w, e.pos._h);
+                    var j0, j = 0;
+                    for (var i = 0; i < imgData.data.length; i += 4) {
+                        color = DIRT_COLOR_RGBA[map.data[j]];
+                        imgData.data[i]   = color[0];
+                        imgData.data[i+1] = color[1];
+                        imgData.data[i+2] = color[2];
+                        imgData.data[i+3] = color[3];
+                        if (i % 16 == 0) { j++; }
+                         
+                    }
+                    context.putImageData(imgData, e.pos._x, e.pos._y);
                 }
             };
 
             this.bind("Draw", draw).bind("RemoveComponent", function (id) {
                 if (id === "Level") this.unbind("Draw", draw);
             });
-        },
-
-        level: function () {
-		    this.trigger("Change");
-
-            return this;
         }
     });
 
