@@ -44,9 +44,8 @@ window.onload = function () {
 
     Crafty.scene("main", function () {
 
-        generateMap();
         var level = Crafty.e("Level")
-            .attr({x: 100, y: 100, w: 256, h: 256})
+            .attr({x: 100, y: 100, w: 48, h: 48})
             .level();
 
         player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
@@ -74,22 +73,6 @@ window.onload = function () {
         GreenTank: [4, 1],
         empty: [0, 0]
     });
-
-    // Function to generate the map
-    function generateMap() {
-
-        var map_w = Math.floor(MAP_WIDTH / PIXEL_SIZE),
-            map_h = Math.floor(MAP_HEIGHT / PIXEL_SIZE);
-
-        map = {
-            data: new Array(map_w * map_h),
-            width: map_w,
-            height: map_h
-            };
-
-        for (var i = 0; i < map_w * map_h; i++)
-            map.data[i] = Crafty.math.randomElementOfArray([0,1]);
-    }                   
 
     Crafty.c("Controls", {
         init: function() {
@@ -288,17 +271,34 @@ window.onload = function () {
         level: function () {
             if (!this.map) {
                     var context = Crafty.canvas.context,
-                        color;
+                        color,
+                        world = new Array(this._w);
+
+                    for (var x = 0; x < this._w; x++) {
+                        world[x] = new Array(this._h);
+                        for (var y = 0; y < this._h; y++) {
+                            world[x][y] = Crafty.math.randomElementOfArray([0,1]);
+                        }
+                    }
                 
-                    this.map = context.createImageData(this._w, this._h);
-                    var j0, j = 0;
-                    for (var i = 0; i < this.map.data.length; i += 4) {
-                        color = DIRT_COLOR_RGBA[map.data[j]];
-                        this.map.data[i]   = color[0];
-                        this.map.data[i+1] = color[1];
-                        this.map.data[i+2] = color[2];
-                        this.map.data[i+3] = color[3];
-                        if (i % 16 == 0) { j++; }
+                    this.map = context.createImageData(this._w * PIXEL_SIZE, this._h * PIXEL_SIZE);
+
+                    var i, x, rx, y, ry;
+                    i = x = rx = y = ry = 0;
+                    while (x < this._w) {
+                        while (y < this._h) {
+                            color = DIRT_COLOR_RGBA[world[x][y]];
+                            this.map.data[i]   = color[0];
+                            this.map.data[i+1] = color[1];
+                            this.map.data[i+2] = color[2];
+                            this.map.data[i+3] = color[3];
+                            i += 4;
+                            ry++;
+                            if (ry == 4) { y++; ry = 0; }
+                        }
+                        y = 0;
+                        rx++;
+                        if (rx == 4) { x++; rx = 0; }
                     }
 
                     this.ready = true;
