@@ -46,7 +46,8 @@ window.onload = function () {
 
         generateMap();
         var level = Crafty.e("Level")
-            .attr({x: 100, y: 100, w: 256, h: 256});
+            .attr({x: 100, y: 100, w: 256, h: 256})
+            .level();
 
         player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
             .attr({ x: 350, y: 350, z: 1 })
@@ -267,34 +268,43 @@ window.onload = function () {
     });
 
     Crafty.c("Level", {
-        ready: true,
+        ready: false,
+        map: null,
 
         init: function () {
             this.requires("Canvas, 2D");
 
             var draw = function (e) {
-                if (e.type === "canvas") {
-                    var context = e.ctx,
-                        color;
-                
-                    var imgData = context.getImageData(e.pos._x, e.pos._y, e.pos._w, e.pos._h);
-                    var j0, j = 0;
-                    for (var i = 0; i < imgData.data.length; i += 4) {
-                        color = DIRT_COLOR_RGBA[map.data[j]];
-                        imgData.data[i]   = color[0];
-                        imgData.data[i+1] = color[1];
-                        imgData.data[i+2] = color[2];
-                        imgData.data[i+3] = color[3];
-                        if (i % 16 == 0) { j++; }
-                         
-                    }
-                    context.putImageData(imgData, e.pos._x, e.pos._y);
+                if (e.type === "canvas" && this.ready) {
+                    e.ctx.putImageData(this.map, e.pos._x, e.pos._y);
                 }
             };
 
             this.bind("Draw", draw).bind("RemoveComponent", function (id) {
                 if (id === "Level") this.unbind("Draw", draw);
             });
+        },
+
+        level: function () {
+            if (!this.map) {
+                    var context = Crafty.canvas.context,
+                        color;
+                
+                    this.map = context.createImageData(this._w, this._h);
+                    var j0, j = 0;
+                    for (var i = 0; i < this.map.data.length; i += 4) {
+                        color = DIRT_COLOR_RGBA[map.data[j]];
+                        this.map.data[i]   = color[0];
+                        this.map.data[i+1] = color[1];
+                        this.map.data[i+2] = color[2];
+                        this.map.data[i+3] = color[3];
+                        if (i % 16 == 0) { j++; }
+                    }
+
+                    this.ready = true;
+            }             
+
+            return this;
         }
     });
 
