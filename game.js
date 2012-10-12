@@ -45,8 +45,7 @@ window.onload = function () {
     Crafty.scene("main", function () {
 
         var level = Crafty.e("Level")
-            .attr({x: 100, y: 100, w: 48, h: 48})
-            .level();
+            .level(150, 150, 48, 48);
 
         player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
             .attr({ x: 350, y: 350, z: 1 })
@@ -268,25 +267,30 @@ window.onload = function () {
             });
         },
 
-        level: function () {
+        level: function (x, y, w, h) {
+            this._x = x;
+            this._y = y;
+            this._w = w * PIXEL_SIZE; 
+            this._h = h * PIXEL_SIZE;
+
             if (!this.map) {
                     var context = Crafty.canvas.context,
                         color,
-                        world = new Array(this._w);
+                        world = new Array(w);
 
-                    for (var x = 0; x < this._w; x++) {
-                        world[x] = new Array(this._h);
-                        for (var y = 0; y < this._h; y++) {
+                    for (var x = 0; x < w; x++) {
+                        world[x] = new Array(h);
+                        for (var y = 0; y < h; y++) {
                             world[x][y] = Crafty.math.randomElementOfArray([0,1]);
                         }
                     }
-                
-                    this.map = context.createImageData(this._w * PIXEL_SIZE, this._h * PIXEL_SIZE);
+
+                    this.map = context.createImageData(this._w, this._h);
 
                     var i, x, rx, y, ry;
                     i = x = rx = y = ry = 0;
-                    while (x < this._w) {
-                        while (y < this._h) {
+                    while (x < w) {
+                        while (y < h) {
                             color = DIRT_COLOR_RGBA[world[x][y]];
                             this.map.data[i]   = color[0];
                             this.map.data[i+1] = color[1];
@@ -294,15 +298,17 @@ window.onload = function () {
                             this.map.data[i+3] = color[3];
                             i += 4;
                             ry++;
-                            if (ry == 4) { y++; ry = 0; }
+                            if (ry == PIXEL_SIZE) { y++; ry = 0; }
                         }
                         y = 0;
                         rx++;
-                        if (rx == 4) { x++; rx = 0; }
+                        if (rx == PIXEL_SIZE) { x++; rx = 0; }
                     }
 
                     this.ready = true;
-            }             
+            }
+            
+            this.trigger("Change");
 
             return this;
         }
