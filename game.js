@@ -45,7 +45,7 @@ window.onload = function () {
     Crafty.scene("main", function () {
 
         level = Crafty.e("Level")
-            .level(150, 150, 48, 48);
+            .level(0, 0, 100, 100);
 
         blueBase = Crafty.e("Base")
             .attr({ x:300, y:300 })
@@ -167,23 +167,23 @@ window.onload = function () {
 
                 if (xdir > 0 && player1._x > rx_limit)
                 {
-                    Crafty.viewport.x--; 
-                    rx_limit++; lx_limit++;
+                    Crafty.viewport.x -= PIXEL_SIZE; 
+                    rx_limit += PIXEL_SIZE; lx_limit += PIXEL_SIZE;
                 }
                 else if (xdir < 0 && player1._x < lx_limit)
                 {
-                    Crafty.viewport.x++;
-                    rx_limit--; lx_limit--;
+                    Crafty.viewport.x += PIXEL_SIZE;
+                    rx_limit -= PIXEL_SIZE; lx_limit -= PIXEL_SIZE;
                 }
                 if (ydir > 0 && player1._y > ry_limit)
                 {
-                    Crafty.viewport.y--; 
-                    ry_limit++; ly_limit++;
+                    Crafty.viewport.y -= PIXEL_SIZE; 
+                    ry_limit += PIXEL_SIZE; ly_limit += PIXEL_SIZE;
                 }
                 else if (ydir < 0 && player1._y < ly_limit)
                 {
-                    Crafty.viewport.y++;
-                    ry_limit--; ly_limit--;
+                    Crafty.viewport.y += PIXEL_SIZE;
+                    ry_limit -= PIXEL_SIZE; ly_limit -= PIXEL_SIZE;
                 }
 
                 // Z INDEX DEBUG
