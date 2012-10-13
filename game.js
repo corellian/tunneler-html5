@@ -17,7 +17,7 @@ window.onload = function () {
         // TANK_COLOR = [["#f0eb18", "#1f00fe", "#0000a7"],
         //               ["#f0eb18", "#22ff05", "#159e04"]];
 
-    var player1, player2;
+    var level, player1, player2, blueBase, greenBase;
 
     // Viewport limits
     var rx_limit = Crafty.viewport.width/2 
@@ -25,7 +25,7 @@ window.onload = function () {
         lx_limit = Crafty.viewport.width/4 - TANK_WIDTH/2,
         ry_limit = Crafty.viewport.height/2 
                 + Crafty.viewport.height/4 - TANK_HEIGHT/2, 
-        ly_limit = Crafty.viewport.height/4 - TANK_HEIGHT/2; 
+        ly_limit = Crafty.viewport.height/4 - TANK_HEIGHT/2;
 
     // The loading screen that will display while our assets load
     Crafty.scene("loading", function () {
@@ -44,32 +44,32 @@ window.onload = function () {
 
     Crafty.scene("main", function () {
 
-        var level = Crafty.e("Level")
+        level = Crafty.e("Level")
             .level(150, 150, 48, 48);
 
-        player1 = Crafty.e("2D, Canvas, BlueTank, Tank, Controls, solid")
-            .attr({ x: 350, y: 350, z: 1 })
-            .rightControls(1)
-            .Tank("blue");
+        blueBase = Crafty.e("Base")
+            .attr({ x:300, y:300 })
+            .base(BASE_COLOR[0]);
 
-        player2 = Crafty.e("2D, Canvas, GreenTank, Tank, Controls, solid")
-            .attr({ x: 650, y: 350, z: 1 })
-            .leftControls(1)
-            .Tank("green");
+        greenBase = Crafty.e("Base")
+            .attr({ x:600, y:300 })
+            .base(BASE_COLOR[1]);
 
-        var blueBase = Crafty.e("2D, TankBase")
-                .attr({x:300, y:300})
-                .tankbase(BASE_COLOR[0]),
+        player1 = Crafty.e("Tank")
+            .attr({ x: 350, y: 350 })
+            .controls("right", 1)
+            .tank("blue");
 
-            greenBase = Crafty.e("2D, TankBase")
-                .attr({x:600, y:300})
-                .tankbase(BASE_COLOR[1]);
+        player2 = Crafty.e("Tank")
+            .attr({ x: 650, y: 350 })
+            .controls("left", 1)
+            .tank("green");
     });    
 
     // Turn the sprite map into usable components
     Crafty.sprite(32, "assets/sprites.png", {
-        BlueTank: [4, 2],
-        GreenTank: [4, 1],
+        blueTank: [4, 2],
+        greenTank: [4, 1],
         empty: [0, 0]
     });
 
@@ -77,21 +77,23 @@ window.onload = function () {
         init: function() {
             this.requires('Multiway');
         },
-        
-        leftControls: function(speed) {
-            this.multiway(speed, {W: -90, S: 90, D: 0, A: 180})
-            return this;
-        },
-        rightControls: function(speed) {
-            this.multiway(speed, {UP_ARROW: -90, DOWN_ARROW: 90, RIGHT_ARROW: 0, LEFT_ARROW: 180})
+
+        controls: function(type, speed) {
+            switch (type) {
+                case "left":
+                    this.multiway(speed, {W: -90, S: 90, D: 0, A: 180});
+                    break;
+                case "right":
+                    this.multiway(speed, {UP_ARROW: -90, DOWN_ARROW: 90, RIGHT_ARROW: 0, LEFT_ARROW: 180});
+            }
             return this;
         }
     });
 
     Crafty.c('Tank', {
         init: function() {
-            this.requires("SpriteAnimation, Collision, SolidHitBox");
-            
+            this.requires("2D, Canvas, Controls, SpriteAnimation, Collision, solid");
+             
             this.collision(new Crafty.polygon([[0,0],[0,5],[5,5],[5,0]])); 
 
             this.bind("NewDirection", function (direction) {
@@ -183,15 +185,35 @@ window.onload = function () {
                     Crafty.viewport.y++;
                     ry_limit--; ly_limit--;
                 }
+
+                // Z INDEX DEBUG
+                /*
+                console.log("bluebase="+blueBase.walls[0]._z);
+                console.log("blueTank="+player1._z);
+                console.log("level="+level._z);
+                */
+                
             })
             .onHit("fire", function() {
                 //this.destroy();
                 // TODO: Subtract life and play hit sound
             });
         },
-        Tank: function(color) {
+        tank: function(color) {
                 
-            var sprite_row = (color === "blue"? 2 : 1);  
+            var sprite_row;
+
+            switch (color)
+            {
+                case "blue":
+                    sprite_row = 2;
+                    this.requires("blueTank");
+                    break;
+                case "green":
+                    sprite_row = 1;
+                    this.requires("greenTank");
+                    break;
+            }
 
             this.animate("walk_down", 0, sprite_row, 0)
                 .animate("walk_right_down", 1, sprite_row, 1)
@@ -206,46 +228,77 @@ window.onload = function () {
         }
     });
 
-    Crafty.c("TankBase", {
+    Crafty.c("Base", {
+        walls: null,
+
         init: function() {
 
-            this.requires("2D");
-            
-            this.leftwall = Crafty.e("Canvas, 2D, Color, solid");
-            this.lefttopwall = Crafty.e("Canvas, 2D, Color, solid");
-            this.leftbottomwall = Crafty.e("Canvas, 2D, Color, solid");
-            this.rightwall = Crafty.e("Canvas, 2D, Color, solid");
-            this.righttopwall = Crafty.e("Canvas, 2D, Color, solid");
-            this.rightbottomwall = Crafty.e("Canvas, 2D, Color, solid");
+            this.requires("2D, Canvas");
+
+            // RT,R,RB,LB,L,LT
+            this.walls = new Array(6);
+
+            for(var i = 0; i < this.walls.length; i++)
+            {
+                this.walls[i] = Crafty.e("2D, Canvas, Color, solid");
+            }
         },
-        tankbase: function(color) {
+
+        base: function(color) {
+
             var wall_width = 4, wall_length = 128, door_length = 32;
 
-            this.leftwall.attr({
-                    x: this.x, y: this.y, w: wall_width, h: wall_length
-                }).color(color);
-            this.lefttopwall.attr({
-                    x: this.x, y: this.y, w: (wall_length/2) - (door_length/2), h: wall_width
-                }).color(color);
-            this.leftbottomwall.attr({
-                    x: this.x, y: this.y + wall_length, w: (wall_length/2) - (door_length/2), h: wall_width
-                }).color(color);
+            this.walls[0].attr({
+                    x: this._x + (wall_length / 2) + (door_length / 2),
+                    y: this._y,
+                    w: (wall_length/2) - (door_length/2),
+                    h: wall_width
+                });
 
-            this.rightwall.attr({
-                    x: this.x + wall_length - wall_width, y: this.y, w: wall_width, h: wall_length
-                }).color(color);
-            this.righttopwall.attr({
-                    x: this.x + (wall_length / 2) + (door_length / 2), y: this.y, w: (wall_length/2) - (door_length/2), h: wall_width
-                }).color(color);
-            this.rightbottomwall.attr({
-                    x: this.x + (wall_length / 2) + (door_length / 2), y: this.y + wall_length, w: (wall_length/2) - (door_length/2), h: wall_width
-                }).color(color);
-            this.attach(this.leftwall);
-            this.attach(this.lefttopwall);
-            this.attach(this.leftbottomwall);
-            this.attach(this.rightwall);
-            this.attach(this.righttopwall);
-            this.attach(this.rightbottomwall);
+            this.walls[1].attr({
+                    x: this._x + wall_length - wall_width,
+                    y: this._y,
+                    w: wall_width,
+                    h: wall_length
+                });
+
+            this.walls[2].attr({
+                    x: this._x + (wall_length / 2) + (door_length / 2),
+                    y: this._y + wall_length,
+                    w: (wall_length/2) - (door_length/2),
+                    h: wall_width
+                });
+
+            this.walls[3].attr({
+                    x: this._x,
+                    y: this._y + wall_length,
+                    w: (wall_length/2) - (door_length/2),
+                    h: wall_width
+                });
+
+            this.walls[4].attr({
+                    x: this._x,
+                    y: this._y,
+                    w: wall_width,
+                    h: wall_length
+                });
+
+            this.walls[5].attr({
+                    x: this._x,
+                    y: this._y,
+                    w: (wall_length/2) - (door_length/2),
+                    h: wall_width
+                });
+
+            for (var i = 0; i < this.walls.length; i++)
+            {
+                this.walls[i].color(color).attr({ z: this._z });
+                this.attach(this.walls[i]);
+            }
+
+            this.trigger("Change");
+
+            return this;
         }
     });
 
@@ -254,10 +307,10 @@ window.onload = function () {
         map: null,
 
         init: function () {
-            this.requires("Canvas, 2D");
+            this.requires("2D, Canvas");
 
             var draw = function (e) {
-                if (e.type === "canvas" && this.ready) {
+                if (this.ready) {
                     e.ctx.putImageData(this.map, e.pos._x, e.pos._y);
                 }
             };
@@ -268,44 +321,41 @@ window.onload = function () {
         },
 
         level: function (x, y, w, h) {
-            this._x = x;
-            this._y = y;
-            this._w = w * PIXEL_SIZE; 
-            this._h = h * PIXEL_SIZE;
+            this.attr({x: x, y: y, w: w * PIXEL_SIZE, h: h * PIXEL_SIZE});
 
             if (!this.map) {
-                    var context = Crafty.canvas.context,
-                        color,
-                        world = new Array(w);
+                var context = Crafty.canvas.context,
+                    color,
+                    world = new Array(w);
 
-                    for (var x = 0; x < w; x++) {
-                        world[x] = new Array(h);
-                        for (var y = 0; y < h; y++) {
-                            world[x][y] = Crafty.math.randomElementOfArray([0,1]);
-                        }
+                for (var x = 0; x < w; x++) {
+                    world[x] = new Array(h);
+                    for (var y = 0; y < h; y++) {
+                        world[x][y] = Crafty.math.randomElementOfArray([0,1]);
                     }
+                }
 
-                    this.map = context.createImageData(this._w, this._h);
+                this.map = context.createImageData(this.w, this.h);
 
-                    var i, x, rx, y, ry;
-                    i = x = rx = y = ry = 0;
-                    while (x < w) {
-                        while (y < h) {
-                            color = DIRT_COLOR_RGBA[world[x][y]];
-                            this.map.data[i]   = color[0];
-                            this.map.data[i+1] = color[1];
-                            this.map.data[i+2] = color[2];
-                            this.map.data[i+3] = color[3];
-                            i += 4;
-                            ry++;
-                            if (ry == PIXEL_SIZE) { y++; ry = 0; }
-                        }
-                        y = 0;
-                        rx++;
-                        if (rx == PIXEL_SIZE) { x++; rx = 0; }
+                var i, x, rx, y, ry;
+                i = x = rx = y = ry = 0;
+                while (x < w) {
+                    while (y < h) {
+                        color = DIRT_COLOR_RGBA[world[x][y]];
+                        this.map.data[i]   = color[0];
+                        this.map.data[i+1] = color[1];
+                        this.map.data[i+2] = color[2];
+                        this.map.data[i+3] = color[3];
+                        i += 4;
+                        ry++;
+                        if (ry == PIXEL_SIZE) { y++; ry = 0; }
                     }
+                    y = 0;
+                    rx++;
+                    if (rx == PIXEL_SIZE) { x++; rx = 0; }
+                }
 
-                    this.ready = true;
+                this.ready = true;
             }
             
             this.trigger("Change");
