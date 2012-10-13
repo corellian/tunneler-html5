@@ -311,7 +311,7 @@ window.onload = function () {
 
             var draw = function (e) {
                 if (this.ready) {
-                    e.ctx.putImageData(this.map, e.pos._x, e.pos._y);
+                    e.ctx.drawImage(this.map, e.pos._x, e.pos._y);
                 }
             };
 
@@ -324,7 +324,10 @@ window.onload = function () {
             this.attr({x: x, y: y, w: w * PIXEL_SIZE, h: h * PIXEL_SIZE});
 
             if (!this.map) {
-                var context = Crafty.canvas.context,
+                this.map = document.createElement('canvas');
+                this.map.height = this.h;
+                this.map.width = this.w;
+                var context = this.map.getContext('2d'),
                     color,
                     world = new Array(w);
 
@@ -335,17 +338,17 @@ window.onload = function () {
                     }
                 }
 
-                this.map = context.createImageData(this.w, this.h);
+                var image = context.getImageData(0, 0, this.w, this.h);
 
                 var i, x, rx, y, ry;
                 i = x = rx = y = ry = 0;
                 while (x < w) {
                     while (y < h) {
                         color = DIRT_COLOR_RGBA[world[x][y]];
-                        this.map.data[i]   = color[0];
-                        this.map.data[i+1] = color[1];
-                        this.map.data[i+2] = color[2];
-                        this.map.data[i+3] = color[3];
+                        image.data[i]   = color[0];
+                        image.data[i+1] = color[1];
+                        image.data[i+2] = color[2];
+                        image.data[i+3] = color[3];
                         i += 4;
                         ry++;
                         if (ry == PIXEL_SIZE) { y++; ry = 0; }
@@ -354,7 +357,7 @@ window.onload = function () {
                     rx++;
                     if (rx == PIXEL_SIZE) { x++; rx = 0; }
                 }
-
+                context.putImageData(image, 0, 0);
                 this.ready = true;
             }
             
