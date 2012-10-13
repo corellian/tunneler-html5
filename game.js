@@ -20,11 +20,11 @@ window.onload = function () {
     var level, player1, player2, blueBase, greenBase;
 
     // Viewport limits
-    var rx_limit = Crafty.viewport.width/2 
-                + Crafty.viewport.width/4 - TANK_WIDTH/2, 
+    var rx_limit = Crafty.viewport.width/2
+                + Crafty.viewport.width/4 - TANK_WIDTH/2,
         lx_limit = Crafty.viewport.width/4 - TANK_WIDTH/2,
-        ry_limit = Crafty.viewport.height/2 
-                + Crafty.viewport.height/4 - TANK_HEIGHT/2, 
+        ry_limit = Crafty.viewport.height/2
+                + Crafty.viewport.height/4 - TANK_HEIGHT/2,
         ly_limit = Crafty.viewport.height/4 - TANK_HEIGHT/2;
 
     // The loading screen that will display while our assets load
@@ -64,7 +64,7 @@ window.onload = function () {
             .attr({ x: 650, y: 350 })
             .controls("left", 1)
             .tank("green");
-    });    
+    });
 
     // Turn the sprite map into usable components
     Crafty.sprite(32, "assets/sprites.png", {
@@ -93,8 +93,8 @@ window.onload = function () {
     Crafty.c('Tank', {
         init: function() {
             this.requires("2D, Canvas, Controls, SpriteAnimation, Collision, solid");
-             
-            this.collision(new Crafty.polygon([[0,0],[0,5],[5,5],[5,0]])); 
+
+            this.collision(new Crafty.polygon([[0,0],[0,5],[5,5],[5,0]]));
 
             this.bind("NewDirection", function (direction) {
                     var new_dir = "walk", new_hitbox, stopped = false;
@@ -103,7 +103,7 @@ window.onload = function () {
                     if (direction.x)
                     {
                         if (direction.x > 0)
-                            new_dir += "_right"; 
+                            new_dir += "_right";
                         else
                             new_dir += "_left";
                     }
@@ -145,10 +145,10 @@ window.onload = function () {
                             stopped = true;
                             break;
                     }
-                    
+
                     if (!stopped && !this.isPlaying(new_dir))
                     {
-                        this.collision(new Crafty.polygon(new_hitbox)); 
+                        this.collision(new Crafty.polygon(new_hitbox));
                         this.stop().animate(new_dir, 0, 0);
                     }
             })
@@ -162,12 +162,12 @@ window.onload = function () {
                     this.attr({x: from.x, y: from.y});
                 }
 
-                var xdir = this._x - from.x, 
-                    ydir = this._y - from.y;  
+                var xdir = this._x - from.x,
+                    ydir = this._y - from.y;
 
                 if (xdir > 0 && player1._x > rx_limit)
                 {
-                    Crafty.viewport.x -= PIXEL_SIZE; 
+                    Crafty.viewport.x -= PIXEL_SIZE;
                     rx_limit += PIXEL_SIZE; lx_limit += PIXEL_SIZE;
                 }
                 else if (xdir < 0 && player1._x < lx_limit)
@@ -177,7 +177,7 @@ window.onload = function () {
                 }
                 if (ydir > 0 && player1._y > ry_limit)
                 {
-                    Crafty.viewport.y -= PIXEL_SIZE; 
+                    Crafty.viewport.y -= PIXEL_SIZE;
                     ry_limit += PIXEL_SIZE; ly_limit += PIXEL_SIZE;
                 }
                 else if (ydir < 0 && player1._y < ly_limit)
@@ -192,7 +192,7 @@ window.onload = function () {
                 console.log("blueTank="+player1._z);
                 console.log("level="+level._z);
                 */
-                
+
             })
             .onHit("fire", function() {
                 //this.destroy();
@@ -200,7 +200,7 @@ window.onload = function () {
             });
         },
         tank: function(color) {
-                
+
             var sprite_row;
 
             switch (color)
@@ -311,7 +311,7 @@ window.onload = function () {
 
             var draw = function (e) {
                 if (this.ready) {
-                    e.ctx.putImageData(this.map, e.pos._x, e.pos._y);
+                    e.ctx.drawImage(this.map, e.pos._x, e.pos._y);
                 }
             };
 
@@ -324,7 +324,10 @@ window.onload = function () {
             this.attr({x: x, y: y, w: w * PIXEL_SIZE, h: h * PIXEL_SIZE});
 
             if (!this.map) {
-                var context = Crafty.canvas.context,
+                this.map = document.createElement('canvas');
+                this.map.height = this.h;
+                this.map.width = this.w;
+                var context = this.map.getContext('2d'),
                     color,
                     world = new Array(w);
 
@@ -335,17 +338,17 @@ window.onload = function () {
                     }
                 }
 
-                this.map = context.createImageData(this.w, this.h);
+                var image = context.getImageData(0, 0, this.w, this.h);
 
                 var i, x, rx, y, ry;
                 i = x = rx = y = ry = 0;
                 while (x < w) {
                     while (y < h) {
                         color = DIRT_COLOR_RGBA[world[x][y]];
-                        this.map.data[i]   = color[0];
-                        this.map.data[i+1] = color[1];
-                        this.map.data[i+2] = color[2];
-                        this.map.data[i+3] = color[3];
+                        image.data[i]   = color[0];
+                        image.data[i+1] = color[1];
+                        image.data[i+2] = color[2];
+                        image.data[i+3] = color[3];
                         i += 4;
                         ry++;
                         if (ry == PIXEL_SIZE) { y++; ry = 0; }
@@ -354,10 +357,10 @@ window.onload = function () {
                     rx++;
                     if (rx == PIXEL_SIZE) { x++; rx = 0; }
                 }
-
+                context.putImageData(image, 0, 0);
                 this.ready = true;
             }
-            
+
             this.trigger("Change");
 
             return this;
@@ -375,12 +378,12 @@ window.onload = function () {
             .text("by Cristian Peraferrer")
             .css({ "text-align": "center",
                    "color": "#a80000" });
-         
+
     });
 
     Crafty.scene("game", function () {
         Crafty.background("#000031");
-         
+
     });
 */
 
