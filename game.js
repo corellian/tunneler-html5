@@ -20,14 +20,6 @@ window.onload = function () {
 
     var level, player1, player2, blueBase, greenBase, hole;
 
-    // Viewport limits
-    var rx_limit = Crafty.viewport.width/2
-                + Crafty.viewport.width/4 - TANK_WIDTH/2,
-        lx_limit = Crafty.viewport.width/4 - TANK_WIDTH/2,
-        ry_limit = Crafty.viewport.height/2
-                + Crafty.viewport.height/4 - TANK_HEIGHT/2,
-        ly_limit = Crafty.viewport.height/4 - TANK_HEIGHT/2;
-
     // The loading screen that will display while our assets load
     Crafty.scene("loading", function () {
 
@@ -59,7 +51,7 @@ window.onload = function () {
             .attr({ x:600, y:300 })
             .base(BASE_COLOR[1]);
 
-        player1 = Crafty.e("Tank")
+        player1 = Crafty.e("Tank, Follow")
             .attr({ x: 340, y: 348 })
             .controls("right", TANK_SPEED)
             .tank("blue");
@@ -85,19 +77,60 @@ window.onload = function () {
         controls: function(type, speed) {
             switch (type) {
                 case "left":
-                    this.multiway(speed, {W: -90, S: 90, D: 0, A: 180});
+                    this.multiway(speed, {
+                        W: -90,
+                        S: 90,
+                        D: 0,
+                        A: 180 
+                    });
                     break;
                 case "right":
-                    this.multiway(speed, {UP_ARROW: -90, DOWN_ARROW: 90, RIGHT_ARROW: 0, LEFT_ARROW: 180});
+                    this.multiway(speed, {
+                        UP_ARROW: -90,
+                        DOWN_ARROW: 90,
+                        RIGHT_ARROW: 0,
+                        LEFT_ARROW: 180
+                    });
             }
             return this;
         }
     });
 
-    Crafty.c('Tank', {
+    Crafty.c("Follow", {
+        _pixelsPerMovement: TANK_SPEED,
+
+        init: function() {
+            this.requires("2D, Multiway");
+            this.bind("Moved", function(from) {
+                var xdir = this._x - from.x,
+                    ydir = this._y - from.y;
+
+                if (xdir > 0)
+                {
+                    Crafty.viewport.x -= this._pixelsPerMovement;
+                }
+                else if (xdir < 0)
+                {
+                    Crafty.viewport.x += this._pixelsPerMovement;
+                }
+
+                if (ydir > 0)
+                {
+                    Crafty.viewport.y -= this._pixelsPerMovement;
+                }
+                else if (ydir < 0)
+                {
+                    Crafty.viewport.y += this._pixelsPerMovement;
+                }
+            });
+        }
+    });
+
+    Crafty.c("Tank", {
+        _counter: 0,
+
         init: function() {
             this.requires("2D, Canvas, Controls, SpriteAnimation, Collision, solid");
-
             this.collision(new Crafty.polygon([[0,0],[0,5],[5,5],[5,0]]));
 
             this.bind("NewDirection", function (direction) {
@@ -161,36 +194,20 @@ window.onload = function () {
                 // TODO: Move unit out of solid tile
             })
             */
-            .bind('Moved', function(from) {
+            .bind("Moved", function(from) {
+
                 if (this.hit("solid")) {
-                    this.attr({x: from.x, y: from.y});
+                    this.attr({ x: from.x, y: from.y });
+                }
+                if (this._counter < 6) {
+                    this._counter++;
+                    this.attr({ x: from.x, y: from.y });
+                } else {
+                    this._counter = 0;
                 }
 
                 level.map.getContext("2d").putImageData(hole, this._x, this._y, 0, 0, TANK_WIDTH, TANK_HEIGHT);
 
-                var xdir = this._x - from.x,
-                    ydir = this._y - from.y;
-
-                if (xdir > 0 && player1._x > rx_limit)
-                {
-                    Crafty.viewport.x -= TANK_SPEED;
-                    rx_limit += TANK_SPEED; lx_limit += TANK_SPEED;
-                }
-                else if (xdir < 0 && player1._x < lx_limit)
-                {
-                    Crafty.viewport.x += TANK_SPEED;
-                    rx_limit -= TANK_SPEED; lx_limit -= TANK_SPEED;
-                }
-                if (ydir > 0 && player1._y > ry_limit)
-                {
-                    Crafty.viewport.y -= TANK_SPEED;
-                    ry_limit += TANK_SPEED; ly_limit += TANK_SPEED;
-                }
-                else if (ydir < 0 && player1._y < ly_limit)
-                {
-                    Crafty.viewport.y += TANK_SPEED;
-                    ry_limit -= TANK_SPEED; ly_limit -= TANK_SPEED;
-                }
 
             })
             .onHit("fire", function() {
