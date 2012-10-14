@@ -131,7 +131,8 @@ window.onload = function () {
 
         init: function() {
             this.requires("2D, Canvas, Controls, SpriteAnimation, Collision, solid");
-            this.collision(new Crafty.polygon([[0,0],[0,5],[5,5],[5,0]]));
+            this.collision(new Crafty.polygon([[6,4],[14,0],[18,0],[26,4],
+                [26,28],[6,28]]));
 
             this.bind("NewDirection", function (direction) {
                     var new_dir = "walk", new_hitbox, stopped = false;
@@ -160,7 +161,7 @@ window.onload = function () {
                                 [4,26],[4,10]];
                             break;
                         case "walk_right_down":
-                            new_hitbox = [[14,2],[18,2],[30,14],[30,18],[26,26],
+                            new_hitbox = [[13,2],[18,2],[30,14],[30,18],[26,26],
                                 [18,30],[14,30],[2,18],[2,14]];
                             break;
                         case "walk_down":
@@ -172,10 +173,20 @@ window.onload = function () {
                                 [18,30],[14,30],[2,18],[2,14]];
                             break;
                         case "walk_up":
+                            new_hitbox = [[6,4],[14,0],[18,0],[26,4],[26,28],
+                                [6,28]];
+                            break;
                         case "walk_left":
+                            new_hitbox = [[4,6],[28,6],[28,26],[4,26],[0,18],
+                                [0,14]];
+                            break;
                         case "walk_left_up":
+                            new_hitbox = [[14,2],[18,2],[30,14],[30,18],[18,30],
+                                [14,30],[2,18],[2,14],[6,6]];
+                            break;
                         case "walk_left_down":
-                            new_hitbox = [[0,0],[0,5],[5,5],[5,0]];
+                            new_hitbox = [[14,2],[18,2],[30,14],[30,18],[18,30],
+                                [14,30],[6,26],[2,18],[2,14]];
                             break;
                         default:
                             this.stop();
