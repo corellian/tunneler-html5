@@ -24,7 +24,7 @@ window.onload = function () {
     Crafty.scene("loading", function () {
 
         // Load takes an array of assets and a callback when complete
-        Crafty.load(["assets/sprites.png"], function () {
+        Crafty.load(["web/images/sprites.png"], function () {
             Crafty.scene("main"); // When everything is loaded, run the main scene
         });
 
@@ -65,7 +65,7 @@ window.onload = function () {
     });
 
     // Turn the sprite map into usable components
-    Crafty.sprite(32, "assets/sprites.png", {
+    Crafty.sprite(32, "web/images/sprites.png", {
         blueTank: [4, 2],
         greenTank: [4, 1],
         empty: [0, 0]
