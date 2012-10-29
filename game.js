@@ -41,7 +41,9 @@ window.onload = function () {
             .level(0, 0, 1000, 1000);
         
         hole = level.map.getContext("2d").getImageData(0, 0, TANK_WIDTH, TANK_HEIGHT);
-        for (var i = 0; i < hole.data.length; i++) hole.data[i] = 0;
+        for (var i = 0; i < hole.data.length; i++) {
+            hole.data[i] = 150;
+        }
 
         blueBase = Crafty.e("Base")
             .attr({ x:300, y:300 })
@@ -51,7 +53,7 @@ window.onload = function () {
             .attr({ x:600, y:300 })
             .base(BASE_COLOR[1]);
 
-        player1 = Crafty.e("Tank, Follow")
+        player1 = Crafty.e("Tank, Follow, WiredHitBox")
             .attr({ x: 340, y: 348 })
             .controls("right", TANK_SPEED)
             .tank("blue");
@@ -91,6 +93,9 @@ window.onload = function () {
                         RIGHT_ARROW: 0,
                         LEFT_ARROW: 180
                     });
+                    break;
+                default:
+                    break;
             }
             return this;
         }
@@ -140,18 +145,20 @@ window.onload = function () {
                     // Determine direction string
                     if (direction.x)
                     {
-                        if (direction.x > 0)
+                        if (direction.x > 0) {
                             new_dir += "_right";
-                        else
+                        } else {
                             new_dir += "_left";
+                        }
                     }
 
                     if (direction.y)
                     {
-                        if (direction.y > 0)
+                        if (direction.y > 0) {
                             new_dir += "_down";
-                        else
+                        } else {
                             new_dir += "_up";
+                        }
                     }
 
                     switch(new_dir)
@@ -210,6 +217,8 @@ window.onload = function () {
                 if (this.hit("solid")) {
                     this.attr({ x: from.x, y: from.y });
                 }
+
+                // Limit tank speed
                 if (this._counter < 6) {
                     this._counter++;
                     this.attr({ x: from.x, y: from.y });
@@ -218,7 +227,6 @@ window.onload = function () {
                 }
 
                 level.map.getContext("2d").putImageData(hole, this._x, this._y, 0, 0, TANK_WIDTH, TANK_HEIGHT);
-
 
             })
             .onHit("fire", function() {
@@ -239,6 +247,8 @@ window.onload = function () {
                 case "green":
                     sprite_row = 1;
                     this.requires("greenTank");
+                    break;
+                default:
                     break;
             }
 
@@ -343,7 +353,7 @@ window.onload = function () {
             };
 
             this.bind("Draw", draw).bind("RemoveComponent", function (id) {
-                if (id === "Level") this.unbind("Draw", draw);
+                if (id === "Level") { this.unbind("Draw", draw); }
             });
         },
 
@@ -358,31 +368,31 @@ window.onload = function () {
                     color,
                     world = new Array(w);
 
-                for (var x = 0; x < w; x++) {
-                    world[x] = new Array(h);
-                    for (var y = 0; y < h; y++) {
-                        world[x][y] = Crafty.math.randomElementOfArray([0,1]);
+                for (var _x = 0; _x < w; _x++) {
+                    world[_x] = new Array(h);
+                    for (var _y = 0; _y < h; _y++) {
+                        world[_x][_y] = Crafty.math.randomElementOfArray([0,1]);
                     }
                 }
 
                 var image = context.getImageData(0, 0, this.w, this.h);
 
-                var i, x, rx, y, ry;
-                i = x = rx = y = ry = 0;
-                while (x < w) {
-                    while (y < h) {
-                        color = DIRT_COLOR_RGBA[world[x][y]];
+                var i, u, ru, v, rv;
+                i = u = ru = v = rv = 0;
+                while (u < w) {
+                    while (v < h) {
+                        color = DIRT_COLOR_RGBA[world[u][v]];
                         image.data[i]   = color[0];
                         image.data[i+1] = color[1];
                         image.data[i+2] = color[2];
                         image.data[i+3] = color[3];
                         i += 4;
-                        ry++;
-                        if (ry == PIXEL_SIZE) { y++; ry = 0; }
+                        rv++;
+                        if (rv == PIXEL_SIZE) { v++; rv = 0; }
                     }
-                    y = 0;
-                    rx++;
-                    if (rx == PIXEL_SIZE) { x++; rx = 0; }
+                    v = 0;
+                    ru++;
+                    if (ru == PIXEL_SIZE) { u++; ru = 0; }
                 }
                 context.putImageData(image, 0, 0);
                 this.ready = true;
