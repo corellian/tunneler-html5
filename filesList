@@ -1,0 +1,13 @@
+src/libs/modernizr-2.6.2.min.js
+src/libs/jquery-1.8.2.min.js
+src/libs/crafty-0.5.2.js
+src/libs/underscore-1.4.2.min.js
+src/libs/backbone-0.9.2.min.js
+src/libs/require-jquery.js
+src/components/*.js
+src/sprites.js
+src/config.js
+src/entities/base/BaseEntity.js
+src/entities/*.js
+src/scenes/*.js
+src/game.js
