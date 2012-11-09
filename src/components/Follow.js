@@ -1,9 +1,9 @@
-Crafty.c("Follow", {
-    _pixelsPerMovement: gameContainer.conf.get("tankSpeed"),
+Crafty.c('Follow', {
+    _pixelsPerMovement: gameContainer.conf.get('tankSpeed'),
 
     init: function() {
-        this.requires("2D, Multiway");
-        this.bind("Moved", function(from) {
+        this.requires('2D, Multiway');
+        this.bind('Moved', function(from) {
             var xdir = this._x - from.x,
                 ydir = this._y - from.y;
 

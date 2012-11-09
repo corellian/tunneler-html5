@@ -1,11 +1,11 @@
-Crafty.c("Controls", {
+Crafty.c('Controls', {
     init: function() {
         this.requires('Multiway');
     },
 
     controls: function(type, speed) {
         switch (type) {
-            case "left":
+            case 'left':
                 this.multiway(speed, {
                     W: -90,
                     S: 90,
@@ -13,7 +13,7 @@ Crafty.c("Controls", {
                     A: 180 
                 });
                 break;
-            case "right":
+            case 'right':
                 this.multiway(speed, {
                     UP_ARROW: -90,
                     DOWN_ARROW: 90,

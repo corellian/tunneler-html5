@@ -1,16 +1,16 @@
-Crafty.c("Base", {
+Crafty.c('Base', {
     walls: null,
 
     init: function() {
 
-        this.requires("2D, Canvas");
+        this.requires('2D, Canvas');
 
         // RT,R,RB,LB,L,LT
         this.walls = new Array(6);
 
         for(var i = 0; i < this.walls.length; i++)
         {
-            this.walls[i] = Crafty.e("2D, Canvas, Color, solid");
+            this.walls[i] = Crafty.e('2D, Canvas, Color, solid');
         }
     },
 
@@ -66,7 +66,7 @@ Crafty.c("Base", {
             this.attach(this.walls[i]);
         }
 
-        this.trigger("Change");
+        this.trigger('Change');
 
         return this;
     }

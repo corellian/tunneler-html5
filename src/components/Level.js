@@ -1,9 +1,9 @@
-Crafty.c("Level", {
+Crafty.c('Level', {
     ready: false,
     map: null,
 
     init: function () {
-        this.requires("2D, Canvas");
+        this.requires('2D, Canvas');
 
         var draw = function (e) {
             if (this.ready) {
@@ -11,14 +11,14 @@ Crafty.c("Level", {
             }
         };
 
-        this.bind("Draw", draw).bind("RemoveComponent", function (id) {
-            if (id === "Level") { this.unbind("Draw", draw); }
+        this.bind('Draw', draw).bind('RemoveComponent', function (id) {
+            if (id === 'Level') { this.unbind('Draw', draw); }
         });
     },
 
     level: function (x, y, w, h) {
-        var pixelSize = gameContainer.conf.get("pixelSize"),
-            dirtColorsRGBA = gameContainer.conf.get("dirtColorsRGBA");
+        var pixelSize = gameContainer.conf.get('pixelSize'),
+            dirtColorsRGBA = gameContainer.conf.get('dirtColorsRGBA');
 
         this.attr({x: x, y: y, w: w * pixelSize, h: h * pixelSize});
 
@@ -60,7 +60,7 @@ Crafty.c("Level", {
             this.ready = true;
         }
 
-        this.trigger("Change");
+        this.trigger('Change');
 
         return this;
     }

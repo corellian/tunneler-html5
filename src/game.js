@@ -5,7 +5,7 @@ window.onload = function() {
 	
 	// Fix for cache
     if (gameContainer.env == 'dev') {
-		version = today.getDay()+"_"+ today.getHours() +"_"+today.getSeconds();
+		version = today.getDay()+'_'+ today.getHours() +'_'+today.getSeconds();
 	} else {
 		version = gameContainer.gameVersion;
 	}
@@ -15,8 +15,8 @@ window.onload = function() {
 	Crafty.canvas.init();
 	
 	require([
-	         "src/sprites.js?v="+version+"",
-	         "src/config.js?v="+version+"",
+	         'src/sprites.js?v='+version+'',
+	         'src/config.js?v='+version+'',
 	], function() {
 		// Create Sprites
 		var sprites = new Sprites();
@@ -26,11 +26,11 @@ window.onload = function() {
 		gameContainer['conf'] = new Config({});
 		
 		//the loading screen - that will be display while assets loaded
-		Crafty.scene("loading", function() {
+		Crafty.scene('loading', function() {
             // clear scene and interface
             sc = []; 
 
-			var loadingText = Crafty.e("2D, "+gameContainer.conf.get('renderType')+", Text")
+			var loadingText = Crafty.e('2D, '+gameContainer.conf.get('renderType')+', Text')
 					.attr({w: 500, h: 20, x: ((Crafty.viewport.width) / 2), y: (Crafty.viewport.height / 2), z: 2})
 					.text('Loading...')
 					.textColor('#fff')
@@ -40,12 +40,12 @@ window.onload = function() {
 			Crafty.load(sprites.getPaths(), function() {
 				// array with local components
                 var elements = [
-                    "src/components/Base.js?v="+version+"",
-                    "src/components/Controls.js?v="+version+"",
-                    "src/components/Follow.js?v="+version+"",
-                    "src/components/Level.js?v="+version+"",
-                    "src/components/Tank.js?v="+version+"",
-                    "src/entities/base/BaseEntity.js?v="+version+"",
+                    'src/components/Base.js?v='+version+'',
+                    'src/components/Controls.js?v='+version+'',
+                    'src/components/Follow.js?v='+version+'',
+                    'src/components/Level.js?v='+version+'',
+                    'src/components/Tank.js?v='+version+'',
+                    'src/entities/base/BaseEntity.js?v='+version+'',
 	    		];
 
     			// when everything is loaded, run the main scene
@@ -63,12 +63,12 @@ window.onload = function() {
 		
 		// declare all scenes
 		var scenes = [
-			"src/scenes/main.js?v="+version+"",
+			'src/scenes/main.js?v='+version+'',
 		];
 		
 		require(scenes, function(){});
 		
 		//automatically play the loading scene
-		Crafty.scene("loading");
+		Crafty.scene('loading');
 	});
 };
