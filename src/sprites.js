@@ -1,5 +1,5 @@
 /**
-    examples:             
+    examples:
     'sprites_name' : {
          'file' : 'path/to/file',
          'tile' : width,
@@ -24,7 +24,7 @@ Sprites = Backbone.Model.extend({
         }
     },
     initialize: function() {
-        
+
     },
 
     /**
@@ -45,7 +45,7 @@ Sprites = Backbone.Model.extend({
             return true;
         };
 
-        _.each(this.get('images'), function(element, k) { 
+        _.each(this.get('images'), function(element, k) {
             if (element['height'] == undefined) {
                 Crafty.sprite(element['width'], element['file'], element['elements']);
             } else {
@@ -62,7 +62,7 @@ Sprites = Backbone.Model.extend({
      */
     getPaths: function() {
         var array = [], i = 0;
-        _.each(this.get('images'), function(element, key) { 
+        _.each(this.get('images'), function(element, key) {
             array[i] = element['file']
             i++;
         });

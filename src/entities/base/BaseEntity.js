@@ -3,7 +3,7 @@ var BaseEntity = Backbone.Model.extend({
         'entity' : null
     },
     initialize: function() {
-    
+
     },
     getEntity : function() {
         return this.get('entity');

@@ -1,20 +1,20 @@
 Crafty.scene('main', function() {
 
-	var elements = [
+    var elements = [
         'src/entities/level.js',
         'src/entities/bluebase.js',
         'src/entities/greenbase.js',
         'src/entities/bluetank.js',
         'src/entities/greentank.js'
-	];
-	
-	// When everything is loaded, run the main scene
-	require(elements, function() {	   
-		sc['level'] = new Level();
-		sc['bluebase'] = new BlueBase();
-		sc['greenbase'] = new GreenBase();
-		sc['bluetank'] = new BlueTank();
-		sc['greentank'] = new GreenTank();
+    ];
+
+    // When everything is loaded, run the main scene
+    require(elements, function() {
+        sc['level'] = new Level();
+        sc['bluebase'] = new BlueBase();
+        sc['greenbase'] = new GreenBase();
+        sc['bluetank'] = new BlueTank();
+        sc['greentank'] = new GreenTank();
 
         var blueTank = sc['bluetank'].getEntity(),
             greenTank = sc['greentank'].getEntity(),
@@ -37,6 +37,6 @@ Crafty.scene('main', function() {
             var tankSize = gameContainer.conf.get('tankSize');
             level.map.getContext('2d').putImageData(hole, this._x, this._y, 0, 0, tankSize, tankSize);
         });
-	});
+    });
 });
 
