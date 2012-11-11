@@ -1,5 +1,5 @@
 /*!
-* Crafty v0.5.2
+* Crafty v0.5.3
 * http://craftyjs.com
 *
 * Copyright 2010, Louis Stowasser
@@ -147,6 +147,11 @@
                 if (comps && and) for (i = 0; i < l; i++) this.extend(components[comps[i]]);
 
                 this.length = elem; //length is the last index (already incremented)
+				
+				// if there's only one entity, return the actual entity
+				if (elem === 1) {
+					return entities[this[elem-1]];
+				}
 
             } else { //Select a specific entity
 
@@ -778,7 +783,7 @@
         * ~~~
         */
         getVersion: function () {
-            return '0.5.2';
+            return '0.5.3';
         },
 
         /**@
@@ -1338,6 +1343,10 @@
 
     //make Crafty global
     window.Crafty = Crafty;
+
+    if (typeof define === 'function') {
+        define('crafty', [], function() { return Crafty; });
+    }
 })(window,
 
 //wrap around components
@@ -1640,7 +1649,7 @@ function(Crafty, window, document) {
 /**@
 * #Crafty.map
 * @category 2D
-* Functions related with querying entities. 
+* Functions related with querying entities.
 * @see Crafty.HashMap
 */
 Crafty.map = new Crafty.HashMap();
@@ -1934,6 +1943,10 @@ Crafty.c("2D", {
 				}
 				this._children = [];
 			}
+			
+			if (this._parent) {
+				this._parent.detach(this);
+			}
 
 			Crafty.map.remove(this);
 
@@ -1968,10 +1981,10 @@ Crafty.c("2D", {
 			y2 = o.y - (this._x + this._w - o.x) * st + (this._y + this._h - o.y) * ct,
 			x3 = o.x + (this._x - o.x) * ct + (this._y + this._h - o.y) * st,
 			y3 = o.y - (this._x - o.x) * st + (this._y + this._h - o.y) * ct,
-			minx = Math.floor(Math.min(x0, x1, x2, x3)),
-			miny = Math.floor(Math.min(y0, y1, y2, y3)),
-			maxx = Math.ceil(Math.max(x0, x1, x2, x3)),
-			maxy = Math.ceil(Math.max(y0, y1, y2, y3));
+			minx = Math.round(Math.min(x0, x1, x2, x3)),
+			miny = Math.round(Math.min(y0, y1, y2, y3)),
+			maxx = Math.round(Math.max(x0, x1, x2, x3)),
+			maxy = Math.round(Math.max(y0, y1, y2, y3));
 
 		this._mbr = { _x: minx, _y: miny, _w: maxx - minx, _h: maxy - miny };
 
@@ -2256,7 +2269,7 @@ Crafty.c("2D", {
 	* @sign public this .origin(String offset)
 	* @param offset - Combination of center, top, bottom, middle, left and right
 	* Set the origin point of an entity for it to rotate around.
-	* 
+	*
 	* @example
 	* ~~~
 	* this.origin("top left")
@@ -2264,7 +2277,7 @@ Crafty.c("2D", {
 	* this.origin("bottom right")
 	* this.origin("middle right")
 	* ~~~
-	* 
+	*
 	* @see .rotation
 	*/
 	origin: function (x, y) {
@@ -2297,9 +2310,9 @@ Crafty.c("2D", {
 	* @trigger Change - when the entity has flipped
 	* @sign public this .flip(String dir)
 	* @param dir - Flip direction
-	* 
+	*
 	* Flip entity on passed direction
-	* 
+	*
 	* @example
 	* ~~~
 	* this.flip("X")
@@ -2312,16 +2325,16 @@ Crafty.c("2D", {
                     this.trigger("Change");
                 }
 	},
-        
+
         /**@
 	* #.unflip
 	* @comp 2D
 	* @trigger Change - when the entity has unflipped
 	* @sign public this .unflip(String dir)
 	* @param dir - Unflip direction
-	* 
+	*
 	* Unflip entity on passed direction (if it's flipped)
-	* 
+	*
 	* @example
 	* ~~~
 	* this.unflip("X")
@@ -2414,12 +2427,12 @@ Crafty.c("Gravity", {
 	* @comp Gravity
 	* @sign public this .gravity([comp])
 	* @param comp - The name of a component that will stop this entity from falling
-	* 
-	* Enable gravity for this entity no matter whether comp parameter is not specified, 
+	*
+	* Enable gravity for this entity no matter whether comp parameter is not specified,
 	* If comp parameter is specified all entities with that component will stop this entity from falling.
 	* For a player entity in a platform game this would be a component that is added to all entities
 	* that the player should be able to walk on.
-	* 
+	*
 	* @example
 	* ~~~
 	* Crafty.e("2D, DOM, Color, Gravity")
@@ -2441,9 +2454,9 @@ Crafty.c("Gravity", {
 	* @comp Gravity
 	* @sign public this .gravityConst(g)
 	* @param g - gravitational constant
-	* 
+	*
 	* Set the gravitational constant to g. The default is .2. The greater g, the faster the object falls.
-	* 
+	*
 	* @example
 	* ~~~
 	* Crafty.e("2D, DOM, Color, Gravity")
@@ -2521,7 +2534,7 @@ Crafty.c("Gravity", {
 /**@
 * #Crafty.polygon
 * @category 2D
-* 
+*
 * Polygon object used for hitboxes and click maps. Must pass an Array for each point as an
 * argument where index 0 is the x position and index 1 is the y position.
 *
@@ -2553,9 +2566,9 @@ Crafty.polygon.prototype = {
 	* @sign public Boolean .containsPoint(Number x, Number y)
 	* @param x - X position of the point
 	* @param y - Y position of the point
-	* 
+	*
 	* Method is used to determine if a given point is contained by the polygon.
-	* 
+	*
 	* @example
 	* ~~~
 	* var poly = new Crafty.polygon([50,0],[100,100],[0,100]);
@@ -2581,9 +2594,9 @@ Crafty.polygon.prototype = {
 	* @sign public void .shift(Number x, Number y)
 	* @param x - Amount to shift the `x` axis
 	* @param y - Amount to shift the `y` axis
-	* 
+	*
 	* Shifts every single point in the polygon by the specified amount.
-	* 
+	*
 	* @example
 	* ~~~
 	* var poly = new Crafty.polygon([50,0],[100,100],[0,100]);
@@ -2655,9 +2668,9 @@ Crafty.circle.prototype = {
 	* @sign public Boolean .containsPoint(Number x, Number y)
 	* @param x - X position of the point
 	* @param y - Y position of the point
-	* 
+	*
 	* Method is used to determine if a given point is contained by the circle.
-	* 
+	*
 	* @example
 	* ~~~
 	* var circle = new Crafty.circle(0, 0, 10);
@@ -2680,9 +2693,9 @@ Crafty.circle.prototype = {
 	* @sign public void .shift(Number x, Number y)
 	* @param x - Amount to shift the `x` axis
 	* @param y - Amount to shift the `y` axis
-	* 
+	*
 	* Shifts the circle by the specified amount.
-	* 
+	*
 	* @example
 	* ~~~
 	* var poly = new Crafty.circle(0, 0, 10);
@@ -4313,8 +4326,8 @@ Crafty.storage = (function () {
         var gl;
         try {
             gl = document.createElement("canvas").getContext("experimental-webgl");
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
+            gl.viewportWidth = support.canvas.width;
+            gl.viewportHeight = support.canvas.height;
         }
         catch (e) { }
         support.webgl = !!gl;
@@ -4602,6 +4615,16 @@ Crafty.extend({
         * simply add `Crafty.viewport.y` onto the entities `y` position.
         */
         _y: 0,
+		
+		/**@
+         * #Crafty.viewport.bounds
+         * @comp Crafty.viewport
+         *
+		 * A rectangle which defines the bounds of the viewport. If this 
+		 * variable is null, Crafty uses the bounding box of all the items
+		 * on the stage.
+         */
+        bounds:null,
 
         /**@
          * #Crafty.viewport.scroll
@@ -4944,7 +4967,6 @@ Crafty.extend({
                 }
             };
         })(),
-
         _clamp: function () {
             // clamps the viewport to the viewable area
             // under no circumstances should the viewport see something outside the boundary of the 'world'
@@ -5294,7 +5316,11 @@ Crafty.extend({
     * PLUS: 187,
     * COMMA: 188,
     * MINUS: 189,
-    * PERIOD: 190
+    * PERIOD: 190,
+    * PULT_UP: 29460,
+    * PULT_DOWN: 29461,
+    * PULT_LEFT: 4,
+    * PULT_RIGHT': 5
     * ~~~
     */
     keys: {
@@ -5384,7 +5410,12 @@ Crafty.extend({
         'PLUS': 187,
         'COMMA': 188,
         'MINUS': 189,
-        'PERIOD': 190
+        'PERIOD': 190,
+        'PULT_UP': 29460,
+        'PULT_DOWN': 29461,
+        'PULT_LEFT': 4,
+        'PULT_RIGHT': 5
+
     },
 
     /**@
@@ -8960,7 +8991,37 @@ Crafty.extend({
             this.trigger("NewAsset", {key : key, value : value});
         }
     },
-
+        /**@
+	* #Crafty.image_whitelist
+	* @category Assets
+	* 
+    * 
+    * A list of file extensions that can be loaded as images by Crafty.load
+    *
+	* @example
+	* ~~~
+        * Crafty.image_whitelist.push("tif")
+	* Crafty.load(["images/sprite.tif", "sounds/jump.mp3"],
+	*     function() {
+	*         //when loaded
+	*         Crafty.scene("main"); //go to main scene
+	*         Crafty.audio.play("jump.mp3"); //Play the audio file
+	*     },
+	*
+	*     function(e) {
+	*       //progress
+	*     },
+	*
+	*     function(e) {
+	*       //uh oh, error loading
+	*     }
+	* );
+	* ~~~
+	* 
+	* @see Crafty.asset
+        * @see Crafty.load
+	*/
+    image_whitelist: ["jpg", "jpeg", "gif", "png", "svg"],
 	/**@
 	* #Crafty.loader
 	* @category Assets
@@ -8973,7 +9034,7 @@ Crafty.extend({
 	* Preloader for all assets. Takes an array of URLs and
 	* adds them to the `Crafty.assets` object.
 	*
-	* Files with suffixes `jpg`, `jpeg`, `gif` and `png` (case insensitive) will be loaded.
+	* Files with suffixes in `image_whitelist` (case insensitive) will be loaded.
 	*
 	* If `Crafty.support.audio` is `true`, files with the following suffixes `mp3`, `wav`, `ogg` and `mp4` (case insensitive) can be loaded.
 	*
@@ -9008,6 +9069,7 @@ Crafty.extend({
 	* ~~~
 	* 
 	* @see Crafty.assets
+        * @see Crafty.image_whitelist
 	*/
     load: function (data, oncomplete, onprogress, onerror) {
             
@@ -9051,7 +9113,7 @@ Crafty.extend({
            
         for (; i < l; ++i) {       
             current = data[i];
-            ext = current.substr(current.lastIndexOf('.') + 1).toLowerCase();
+            ext = current.substr(current.lastIndexOf('.') + 1, 3).toLowerCase();
            
             obj = Crafty.asset(current) || null;   
           
@@ -9077,7 +9139,7 @@ Crafty.extend({
                 }
                    
                  
-            } else if (ext === "jpg" || ext === "jpeg" || ext === "gif" || ext === "png") { 
+            } else if (Crafty.image_whitelist.indexOf(ext) >= 0) { 
                 if(!obj) {
                     obj = new Image();
                     Crafty.asset(current, obj);   
